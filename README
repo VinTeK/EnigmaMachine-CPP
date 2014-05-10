@@ -1,3 +1,3 @@
-An attempt at a historically accurate simuation of an Enigma machine.
+An attempt at a historically accurate simulation of an Enigma machine.
 
 Included is a ncurses interface that allows you to interact with the machine.
