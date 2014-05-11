@@ -56,6 +56,7 @@ void Machine::setReflector(const std::string& param) {
     }
 }
 
+//TODO:
 bool doDoubleStep() {
     return false;
 }

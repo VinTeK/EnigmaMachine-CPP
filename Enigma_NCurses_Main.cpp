@@ -16,6 +16,9 @@ int main(int argc, char** argv) {
 
     /* ncurses settings. */
     initscr();
+    start_color();
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);
+    init_pair(2, COLOR_RED, COLOR_BLACK);
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
@@ -24,12 +27,12 @@ int main(int argc, char** argv) {
     /* Create borders and display windows. */
     WINDOW* plaintextBorder = newwin(h/2-1, w, 0, 0);
     wborder(plaintextBorder, 0, 0, 0, 0, 0, 0, 0, 0);
-    wattron(plaintextBorder, A_BOLD);
+    wattron(plaintextBorder, A_BOLD | COLOR_PAIR(1));
     wprintw(plaintextBorder, "plaintext");
 
     WINDOW* ciphertextBorder = newwin(h/2-1, w, h/2+1, 0);
     wborder(ciphertextBorder, 0, 0, 0, 0, 0, 0, 0, 0);
-    wattron(ciphertextBorder, A_BOLD);
+    wattron(ciphertextBorder, A_BOLD | COLOR_PAIR(2));
     mvwprintw(ciphertextBorder, 0, w-10, "ciphertext");
 
     WINDOW* plaintext = newwin(h/2-3, w-2, 1, 1);
