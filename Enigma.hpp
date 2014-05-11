@@ -109,6 +109,7 @@ class Machine {
 	 */
 	Machine(const std::string& = "AAA");
 
+	int nrotors() const { return m_rotors.size(); }
 	std::string rotorState() const;
 
 	void setNthRotor(int, const std::string&);

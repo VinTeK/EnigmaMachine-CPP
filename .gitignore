@@ -1,4 +1,5 @@
 *.o
 .*.swp
+test.cpp
 enigma
 test
