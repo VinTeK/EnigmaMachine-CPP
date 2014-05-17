@@ -12,6 +12,14 @@ using namespace std;
 int main() {
     srand(time(NULL));
 
+    /*
+     * Letter testing.
+     */
+    cout << "\'A\' is a letter? : " << Letter::isLetter('A') << endl;
+    cout << "1 is a letter?   : " << Letter::isLetter(1) << endl;
+    cout << "\'&\' is a letter? : " << Letter::isLetter('&') << endl;
+    cout << "27 is a letter?  : " << Letter::isLetter(27) << endl << endl;
+
     Machine m;
     /*
      * String encryption.

@@ -20,7 +20,7 @@ char encodeChar(Machine& mch, char ch) {
 std::string encodeString(Machine& mch, const std::string& str) {
     std::string ret(str.length(), ' ');
 
-    for (int i = 0; i < str.length(); ++i)
+    for (std::string::size_type i = 0; i < str.length(); ++i)
 	ret[i] = encodeChar(mch, str[i]);
 
     return ret;

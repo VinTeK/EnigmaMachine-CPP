@@ -39,7 +39,6 @@ int randint() {
 }
 
 void Rotor::randomize() {
-    m_pos = randint();
     m_notch = randint();
     m_map.randomize();
 }

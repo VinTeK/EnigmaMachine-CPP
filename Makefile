@@ -1,4 +1,4 @@
-CPP=ccache clang++
+CPP=g++
 CFLAGS=-Wall -pedantic -g
 OBJS=Enigma_Letter.o Enigma_Map.o Enigma_Rotor.o Enigma_Machine.o Enigma_Interface.o
 EXE=enigma

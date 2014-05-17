@@ -1,3 +1,26 @@
-An attempt at a historically accurate simulation of an Enigma machine.
+Simulation of an Enigma machine.
+
+Note that double stepping has not been implemented due to laziness.
 
 Included is a ncurses interface that allows you to interact with the machine.
+
+Simply type 'make' to build the ncurses version.
+
+Usage:
+    left & right
+	select a rotor to manually move.
+    up & down
+	rotate the selected rotor.
+    F2
+	randomize the currently selected rotor.
+    F3
+	randomize plugboard, reflector, and rotors.
+    F4
+	quit the program.
+
+Argument passing:
+    -h
+	print the usage message and exit.
+
+    -r ROTOR_CONFIGURATION
+	set the rotors to some initial positions. (example: '-r FOO' would set the rotors, from left to right, to 'F', 'O', and 'O'.)

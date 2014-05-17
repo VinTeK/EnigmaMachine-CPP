@@ -107,12 +107,18 @@ class Machine {
 	 * - rotors of type "I", "II", and "III", from left to right
 	 * - all rotors at 'A' position.
 	 */
-	Machine(const std::string& = "AAA");
+	Machine();
+	/*
+	 * Construct with variable number of rotors:
+	 * - unchanged plugboard
+	 * - unchanged reflector
+	 * - rotors at given positions with unchanged wiring
+	 */
+	Machine(const std::string&);
 
 	int nrotors() const { return m_rotors.size(); }
 	std::string rotorState() const;
 
-	void setNthRotor(int, const std::string&);
 	/* Sets each rotor to a given position. */
 	void setRotors(const std::string&);
 	void randSetNthRotor(int);

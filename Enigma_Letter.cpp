@@ -26,7 +26,7 @@ Letter::Letter(char ascii) {
 
 bool Letter::isLetter(int ch) {
     try {
-	Letter tmp = Letter(ch);
+	Letter(ch);
     } catch (std::invalid_argument e) {
 	return false;
     }
@@ -35,7 +35,7 @@ bool Letter::isLetter(int ch) {
 
 bool Letter::isLetter(char ch) {
     try {
-	Letter tmp = Letter(ch);
+	Letter(ch);
     } catch (std::invalid_argument e) {
 	return false;
     }

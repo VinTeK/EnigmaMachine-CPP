@@ -1,3 +1,8 @@
+/*
+ * Just another Enigma Machine simulator.
+ */
+
+#include <algorithm>
 #include <iostream>
 #include <string>
 
@@ -7,12 +12,22 @@
 
 using namespace std;
 
+char* getArg(char** beg, char** end, const string& arg);
+bool argExists(char** beg, char** end, const string& arg);
+void usage(const char* progName);
 void backspace(WINDOW*);
-void hudRefresh(WINDOW*, const Machine&);
-void hudRotateRotor(WINDOW*, const Machine&, int nrotor, int direction);
+void hudRefresh(WINDOW*, const Machine&, int nrotor);
+void hudRotateRotor(WINDOW*, Machine&, int nrotor, bool rotateUp);
 
 int main(int argc, char** argv) {
-    Machine mch("AEU");
+    /* Standard usage message. */
+    if (argExists(argv, argv+argc, "-h")) {
+	usage(argv[0]);
+	return 1;
+    }
+    /* Initialize machine to user-provided rotor configuration. */
+    char* machineParams = getArg(argv, argv+argc, "-r");
+    Machine mch = (!machineParams) ? Machine() : Machine(machineParams);
 
     int ch, h, w, encodedChars = 0, highlightedRotor = mch.nrotors()-1;
 
@@ -48,10 +63,14 @@ int main(int argc, char** argv) {
     wrefresh(ciphertextBorder);
     wrefresh(plaintext);
     wrefresh(ciphertext);
-    hudRefresh(hud, mch);
+    hudRefresh(hud, mch, highlightedRotor);
 
-    while ((ch = getch()) != 'Q') {
-	if (ch == 127) { // backspace
+    while ((ch = getch()) != KEY_F(4)) {
+	/*
+	 * Ascii code for backspace. A portability issue as '127' and 
+	 * KEY_BACKSPACE will behave differently depending on platform.
+	 */
+	if (ch == 127) {
 	    backspace(plaintext);
 	    backspace(ciphertext);
 	    if (encodedChars > 0) {
@@ -59,9 +78,9 @@ int main(int argc, char** argv) {
 		--encodedChars;
 	    }
 	} else if (ch == KEY_UP) {
-	    hudRotateRotor(hud, mch, highlightedRotor, 1);
+	    hudRotateRotor(hud, mch, highlightedRotor, true);
 	} else if (ch == KEY_DOWN) {
-	    hudRotateRotor(hud, mch, highlightedRotor, 0);
+	    hudRotateRotor(hud, mch, highlightedRotor, false);
 	} else if (ch == KEY_LEFT) {
 	    if (highlightedRotor == 0)
 		highlightedRotor = mch.nrotors()-1;
@@ -72,19 +91,24 @@ int main(int argc, char** argv) {
 		highlightedRotor = 0;
 	    else
 		++highlightedRotor;
+	} else if (ch == KEY_F(2)) {
+	    mch.randSetNthRotor(highlightedRotor);
+	} else if (ch == KEY_F(3)) {
+	    mch.randSetPlugboard();
+	    mch.randSetReflector();
+	    mch.randSetRotors();
 	} else {
 	    wprintw(plaintext, "%c", ch);
 	    wprintw(ciphertext, "%c", encodeChar(mch, ch));
-	    if (Letter::isLetter(char(ch))) {
+	    if (Letter::isLetter(char(ch)))
 		++encodedChars;
-	    }
 	}
 	refresh();
 	wrefresh(plaintextBorder);
 	wrefresh(ciphertextBorder);
 	wrefresh(plaintext);
 	wrefresh(ciphertext);
-	hudRefresh(hud, mch);
+	hudRefresh(hud, mch, highlightedRotor);
     }
     delwin(plaintextBorder);
     delwin(ciphertextBorder);
@@ -94,6 +118,24 @@ int main(int argc, char** argv) {
     endwin();
 
     return 0;
+}
+
+char* getArg(char** beg, char** end, const string& arg) {
+    char** itr = find(beg, end, arg);
+
+    if (itr != end && ++itr != end)
+	return *itr;
+    /* No match found. */
+    return NULL;
+}
+
+bool argExists(char** beg, char** end, const string& arg) {
+    return find(beg, end, arg) != end;
+}
+
+void usage(const char* arg) {
+    const static string params = " [-h] [-r ROTOR_SETTINGS]";
+    cout << "usage: " << arg << params << endl;
 }
 
 void backspace(WINDOW* win) {
@@ -111,7 +153,7 @@ void backspace(WINDOW* win) {
     wdelch(win);
 }
 
-void hudRefresh(WINDOW* hud, const Machine& mch) {
+void hudRefresh(WINDOW* hud, const Machine& mch, int highlightedRotor) {
     const static string ROTOR_PROMPT = "rotor positions";
     string rotors = mch.rotorState();
     int h, w;
@@ -125,21 +167,26 @@ void hudRefresh(WINDOW* hud, const Machine& mch) {
     wattroff(hud, A_UNDERLINE | COLOR_PAIR(3));
 
     /* Print current rotor state. */
+    wattron(hud, A_BOLD);
     mvwprintw(hud, 1, w/2 - rotors.length(), rotors.c_str());
+    wattroff(hud, A_BOLD);
+
+    /* Highlight the selected rotor. */
+    wmove(hud, 1, w/2 - rotors.length() + highlightedRotor);
 
     wrefresh(hud);
 }
 
-void hudRotateRotor(WINDOW* hud, const Machine& mch, int nrotor, int dir) {
+void hudRotateRotor(WINDOW* hud, Machine& mch, int nrotor, bool goUp) {
     string rotors = mch.rotorState();
-    /* When dir == 0, go down a letter; dir == 1, go up a letter. */
-    ltr rotated = (dir == 0) ? rotors[nrotor]-ltr(1) : ltr(rotors[nrotor]+ltr(1));
-    int h, w;
-    getmaxyx(hud, h, w);
 
-    /* Changed just the one rotor that rotates. */
-    wprintw(hud, "DO STUFF");
-    mvwaddch(hud, 1, (w/2-rotors.length())+nrotor, rotated.ascii()|A_REVERSE);
+    /* Rotate a rotor. Ugly conversions for modulo behavior. */
+    if (goUp)
+	rotors[nrotor] = ltr(ltr(rotors[nrotor]) + 1).ascii();
+    else
+	rotors[nrotor] = ltr(ltr(rotors[nrotor]) - 1).ascii();
 
-    wrefresh(hud);
+    mch.setRotors(rotors);
+
+    hudRefresh(hud, mch, nrotor);
 }

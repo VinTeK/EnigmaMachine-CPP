@@ -5,13 +5,19 @@
 
 #include "Enigma.hpp"
 
-Machine::Machine(const std::string& param) {
+Machine::Machine() {
     setReflector("B");
     m_rotors.push_back(Rotor("I"));
     m_rotors.push_back(Rotor("II"));
     m_rotors.push_back(Rotor("III"));
+}
 
-    setRotors(param);
+Machine::Machine(const std::string& param) {
+    for (std::string::size_type i = 0; i < param.length(); ++i) {
+	Rotor r;
+	r.move(param[i]);
+	m_rotors.push_back(r);
+    }
 }
 
 std::string Machine::rotorState() const {
@@ -24,15 +30,11 @@ std::string Machine::rotorState() const {
     return ret;
 }
 
-void Machine::setNthRotor(int n, const std::string& param) {
-    m_rotors[n] = Rotor(param);
-}
-
 void Machine::setRotors(const std::string& param) {
     if (param.length() != m_rotors.size())
 	throw std::invalid_argument("Machine(string): size doesn't match");
 
-    for (int i = 0; i < param.length(); ++i)
+    for (std::string::size_type i = 0; i < param.length(); ++i)
 	m_rotors[i].move(param[i]);
 }
 
@@ -97,7 +99,7 @@ ltr Machine::signalEnterRotors(const ltr& l) {
     if (b != e)
 	ret = (*b++).signalIn(l);
     while (b != e)
-	ret = (*b++).signalIn(ret, (*(b-2)).pos());
+	ret = (*b++).signalIn(ret, (*(b-1)).pos());
 
     return ret;
 }
@@ -110,7 +112,7 @@ ltr Machine::signalExitRotors(const ltr& l) {
     if (b != e)
 	ret = (*b++).signalOut(l);
     while (b != e)
-	ret = (*b++).signalOut(ret, (*(b-2)).pos());
+	ret = (*b++).signalOut(ret, (*(b-1)).pos());
 
     return ret;
 }
